@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
         return v;
     }
 
-    public enum Colors {
+    private enum Colors {
         RED,
         GREEN,
         BLUE
