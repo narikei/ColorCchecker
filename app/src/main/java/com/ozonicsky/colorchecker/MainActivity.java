@@ -4,13 +4,10 @@ import android.graphics.Color;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -45,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         mainLayout = this.getWindow().getDecorView();
         mainLayout.forceLayout();
 
-        setColor();
+        updateColor();
 
         setSeekEvent();
         setTextEvent();
@@ -54,118 +51,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         mainLayout.requestFocus();
-        setColor();
+        updateColor();
         return true;
     }
 
     public void tabHex(View view) {
-        new AlertDialog.Builder(this).setTitle(getHex()).setPositiveButton("OK", null).show();
+        new AlertDialog.Builder(this).setTitle(ColorUtil.getHex(red, green, blue)).setPositiveButton("OK", null).show();
     }
 
     public void tabRandom(View view) {
         setRandomColor();
-        setColor();
+        updateColor();
     }
 
     private void setSeekEvent() {
-        seekRed.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                setValue(Colors.RED, progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        seekGreen.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                setValue(Colors.GREEN, progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        seekBlue.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                setValue(Colors.BLUE, progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
+        seekRed.setOnSeekBarChangeListener(new ColorSeekListener(Colors.RED, this));
+        seekGreen.setOnSeekBarChangeListener(new ColorSeekListener(Colors.GREEN, this));
+        seekBlue.setOnSeekBarChangeListener(new ColorSeekListener(Colors.BLUE, this));
     }
 
     private void setTextEvent() {
-        numberRed.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                try {
-                    setValue(Colors.RED, Integer.parseInt(numberRed.getText().toString()));
-                } catch (Exception ignored) {
-                }
-            }
-        });
-
-        numberGreen.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                try {
-                    setValue(Colors.GREEN, Integer.parseInt(numberGreen.getText().toString()));
-                } catch (Exception ignored) {
-                }
-            }
-        });
-
-        numberBlue.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                try {
-                    setValue(Colors.BLUE, Integer.parseInt(numberBlue.getText().toString()));
-                } catch (Exception ignored) {
-                }
-            }
-        });
+        numberRed.addTextChangedListener(new ColorTextWatcher(Colors.RED, this, numberRed));
+        numberGreen.addTextChangedListener(new ColorTextWatcher(Colors.GREEN, this, numberGreen));
+        numberBlue.addTextChangedListener(new ColorTextWatcher(Colors.BLUE, this, numberBlue));
     }
 
 
-    private void setColor() {
+    private void updateColor() {
         mainLayout.setBackgroundColor(Color.rgb(red, green, blue));
 
         seekRed.setProgress(red);
@@ -182,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         blue  = (int)(Math.random() * 255);
     }
 
-    private void setValue(Colors color, int v) {
+    protected void setValue(Colors color, int v) {
         if (v < 0) {
             v = 0;
         }
@@ -209,23 +121,7 @@ public class MainActivity extends AppCompatActivity {
             blue = v;
         }
 
-        setColor();
+        updateColor();
     }
 
-    private String getHex() {
-        return "#" + zeroFill(Integer.toHexString(red)) + zeroFill(Integer.toHexString(green)) + zeroFill(Integer.toHexString(blue));
-    }
-
-    private String zeroFill(String v) {
-        if (v.length() == 1) {
-            return "0" + v;
-        }
-        return v;
-    }
-
-    private enum Colors {
-        RED,
-        GREEN,
-        BLUE
-    }
 }
